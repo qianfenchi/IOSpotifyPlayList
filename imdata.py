@@ -52,11 +52,11 @@ class ImData:
 
     tracks = []
     if len(ids) < 1000:
-      tracks = pyncm.apis.track.GetTrackDetail(ids)
+      tracks = pyncm.apis.track.GetTrackDetail(ids)['songs']
     else:
       ids_list = ImData.cut(ids,1000)
       for tmp_ids in ids_list:
-        tmp_tracks = pyncm.apis.track.GetTrackDetail(tmp_ids)
+        tmp_tracks = pyncm.apis.track.GetTrackDetail(tmp_ids)['songs']
         tracks.append(tmp_tracks)
     return tracks
       

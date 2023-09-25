@@ -12,9 +12,10 @@ def search_for_track(sp, track_name, artist_name):
   search_tracks = search_ret["tracks"]["items"]
   for track in search_tracks:
     test_name  = track["name"]
-    test_artist = track["artists"][0]["name"]
-    if track["name"].lower() == track_name.lower() and track["artists"][0]["name"].lower() == artist_name.lower() :
-       return True , track["uri"]
+    for i in range(len(track["artists"])):
+      test_artist = track["artists"][i]["name"]
+      if test_name.lower() == track_name.lower() and test_artist.lower() == artist_name.lower() :
+        return True , track["uri"]
 
   return False, ""
 
@@ -27,6 +28,8 @@ def creat_sp():
 #need to return playlist uri
 def create_a_playlist(sp, playlist_name):
   user_id = sp.me()['id']
+  while True:
+      play_lists = sp.user_playlists(user_id)
   ret = sp.user_playlist_create(user_id, playlist_name)
   return ret["id"]
 
@@ -41,7 +44,7 @@ def add_items_to_playlist(sp, playlist_uri, track_uris, position=None):
 
 def get_args():
   parser = argparse.ArgumentParser(description='Move NetEase PlayList into Spotify PlayList')
-  parser.add_argument('-u', '--PlaylistUrl', action='append', required=True, help='NetEase\'s playlist url')
+  parser.add_argument('-u', '--PlaylistUrl', required=True, help='NetEase\'s playlist url')
   parser.add_argument('-n', '--PlaylistName', required=True, default=datetime.date.today(), help='New playlist name')
   return parser.parse_args()
 
@@ -73,12 +76,12 @@ def main():
   tracks_count = len(tracks_info)
   cnt = 0
   for track in tracks_info:
-    ret,track_uri = search_for_track(sp, track["track_name"], track["artist"])
+    ret,track_uri = search_for_track(sp, track["name"], track["ar"][0]["name"])
     if ret :
       response = add_items_to_playlist(sp, playlist_id, track_uri)
       if "snapshot_id" in response:
         cnt += 1
-        print(f"Import to \"{playlist_name}\"({cnt} / {tracks_count}) : " + track["track_name"] + " - " + track["artist"])
+        print(f"Import to \"{playlist_name}\"({cnt} / {tracks_count}) : " + track["name"] + " - " + track["ar"][0]["name"])
 
 
 if __name__ == '__main__':
