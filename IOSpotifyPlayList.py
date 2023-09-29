@@ -10,10 +10,11 @@ import csv
 import re
 import string
 from chinese_converter import to_simplified
+import pyncm.apis
+from pyncm.apis.login import LoginViaAnonymousAccount
 
 
 artist_map = {}
-
 
 def search_for_track(sp, track_name, artist_name):
   limit = 10
@@ -93,11 +94,15 @@ def process(sp, playlist_name, playlist_url, update=False):
   tracks_count = len(tracks_info)
   cnt = 0
   items = []
+  url_file = open(playlist_name, 'w', encoding='utf8')
+  writer = csv.writer(url_file)
   for track in tracks_info:
     ret,track_uri = search_for_track(sp, track["name"], track["ar"][0]["name"])
     cnt += 1
     if ret and track_uri not in items:
       items.append(track_uri)
+      url = pyncm.apis.track.GetTrackAudio(track['id'])['data'][0]['url']
+      writer.writerow([track['name'], track['id'], url])
       print(f"Import to \"{playlist_name}\"({cnt} / {tracks_count}) : " + track["name"] + " - " + track["ar"][0]["name"])
 
   # You can add a maximum of 100 tracks per request
@@ -128,6 +133,8 @@ def main():
     else:
       print('Please Set or Update your SPOTIPY_CLIENT_ID into enviroment variables')
 
+
+  LoginViaAnonymousAccount()
   sp = creat_sp()
 
   with open(args.CSVfile, encoding="utf8", newline='') as f:
