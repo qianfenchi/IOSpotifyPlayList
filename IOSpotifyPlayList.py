@@ -87,7 +87,7 @@ def process(sp, playlist_name, playlist_url, update=False):
   playlist_id = get_playlist(sp, playlist_name)
   if not playlist_id:
     playlist_id = create_a_playlist(sp, playlist_name)
-  elif update != "True":
+  elif update != True:
     return
 
   tracks_info = ImData.ReadNetEasePlayList(playlist_url)
@@ -141,6 +141,7 @@ def main():
     reader = csv.reader((line for line in f if not line.startswith('#')), delimiter=';')
     for row in reader:
       playlist_url, playlist_name, update = row
+      update = True if update=='True' else False
       process(sp, playlist_name, playlist_url, update=update)
   
 if __name__ == '__main__':
