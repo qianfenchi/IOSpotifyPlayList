@@ -34,17 +34,17 @@ def search_for_track(sp, track_name, artist_name):
       if fmt(test_name) != fmt(track_name): 
         continue
       if artist_name == test_artist or (artist_name in artist_map and artist_map[artist_name] == test_artist):
-        return True , track["uri"]
+        return True ,track["uri"], track['album']['images'][0]['url']
       artist_ret = sp.search(artist_name, type='artist')['artists']['items']
       for artist in artist_ret:
         if artist['name'] == test_artist:
             artist_map[artist_name] = test_artist
-            return True, track['uri']
+            return True, track['uri'], track['album']['images'][0]['url']
     if offset > 100 or len(search_tracks) < limit:
         break
 
   print(f"track not found for: {track_name} - {artist_name}")
-  return False, ""
+  return False, "", ""
 
 
 def creat_sp():
@@ -94,15 +94,15 @@ def process(sp, playlist_name, playlist_url, update=False):
   tracks_count = len(tracks_info)
   cnt = 0
   items = []
-  url_file = open(playlist_name, 'w', encoding='utf8')
+  url_file = open(playlist_name+'.txt', 'w', encoding='utf8')
   writer = csv.writer(url_file)
   for track in tracks_info:
-    ret,track_uri = search_for_track(sp, track["name"], track["ar"][0]["name"])
+    ret, track_uri, image_url = search_for_track(sp, track["name"], track["ar"][0]["name"])
     cnt += 1
     if ret and track_uri not in items:
       items.append(track_uri)
       url = pyncm.apis.track.GetTrackAudio(track['id'])['data'][0]['url']
-      writer.writerow([track['name'], track['id'], url])
+      writer.writerow([track['name'], track['id'], url, image_url])
       print(f"Import to \"{playlist_name}\"({cnt} / {tracks_count}) : " + track["name"] + " - " + track["ar"][0]["name"])
 
   # You can add a maximum of 100 tracks per request
